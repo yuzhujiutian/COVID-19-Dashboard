@@ -209,6 +209,7 @@ update_date = time_series['Date'].max().strftime('%Y-%m-%d')
 # todo add a page for twitter/social media mentions
 
 app = dash.Dash(external_stylesheets=[dbc.themes.SLATE])
+server = app.server
 # https://dash-bootstrap-components.opensource.faculty.ai/docs/themes/
 
 
