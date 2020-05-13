@@ -3,11 +3,11 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State
+#from dash.dependencies import Input, Output, State
 
-import plotly.graph_objects as go
+#import plotly.graph_objects as go
 import plotly.express as px
-from IPython.core.display import display, HTML
+#from IPython.core.display import display, HTML
 
 import pandas as pd
 import numpy as np
@@ -208,7 +208,7 @@ update_date = time_series['Date'].max().strftime('%Y-%m-%d')
 '''BEGIN DASH APP'''
 # todo add a page for twitter/social media mentions
 
-app = dash.Dash(__name__,external_stylesheets=[dbc.themes.SLATE])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
 server = app.server
 # https://dash-bootstrap-components.opensource.faculty.ai/docs/themes/
 
