@@ -3,7 +3,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-#from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State
 
 #import plotly.graph_objects as go
 import plotly.express as px
@@ -156,16 +156,16 @@ fig_mapbox = px.scatter_mapbox(
     lat=formatted_gdf['Lat'],
     lon=formatted_gdf['Long'],
     hover_name=formatted_gdf['Description'],
-    size=formatted_gdf['Confirmed'].pow(0.2),
+    size=formatted_gdf['Confirmed'].pow(0.3),
     range_color=[0, 4000],
     opacity=0.6,
-    size_max=70,
+    size_max=40,
     zoom=1.2,
     animation_frame=countries_df['Date'].astype(str),
     # center=go.layout.mapbox.Center(lat=14,lon=21),
     template='plotly_dark',
     color=formatted_gdf['Confirmed'],
-    #color_continuous_scale='portland',
+    color_continuous_scale='portland',
     #color_discrete_sequence=px.colors.qualitative.Light24,
     #height=800
     )
@@ -189,7 +189,8 @@ dash_colors = {
     'red': '#BF0000',
     'red_bright': '#d7191c',
     'blue': '#466fc2',
-    'green': '#5bc246'
+    'green': '#5bc246',
+    'orange':'5A9E6F'
 }
 
 def ticker_color(tick_value):
@@ -232,7 +233,7 @@ app.layout = html.Div(children=[
                                                   'fontSize':20},
                                            children='Confirmed Cases'),
                                     html.H3(style={'textAlign':'center',
-                                                   'fontWeight':'bold','color':dash_colors['red_bright'],'fontSize':50},
+                                                   'fontWeight':'bold','color': dash_colors['red_bright'],'fontSize':50},
                                             children='{:,.0f}'.format(int(global_total['Confirmed']))),
                                     html.P(style={'textAlign':'center',
                                                   'color': ticker_color(int(global_total['Confirmed']) - int(delta['Confirmed'])),
@@ -241,14 +242,15 @@ app.layout = html.Div(children=[
                                     ],
                           className='four columns'),
 
-                 html.Div(style={'width':'24.4%','marginRight':'.8%','display':'inline-block','padding':'1rem',
+                 html.Div(id='death-ind',
+                          style={'width':'24.4%','marginRight':'.8%','display':'inline-block','padding':'1rem',
                                  'backgroundColor':dash_colors['background']},
                           children=[html.P(style={'textAlign':'center',
                                                   'color':dash_colors['red_bright'],
                                                   'fontSize':20},
                                            children='Deaths'),
                                     html.H3(style={'textAlign':'center',
-                                                   'fontWeight':'bold','color':dash_colors['red_bright'],'fontSize':50},
+                                                   'fontWeight':'bold','color': dash_colors['red_bright'],'fontSize':50},
                                             children='{:,.0f}'.format(int(global_total['Deaths']))),
                                     html.P(style={'textAlign': 'center',
                                                   'color': dash_colors['red_bright'], 'fontSize': 20},
@@ -256,7 +258,8 @@ app.layout = html.Div(children=[
                                     ],
                           className='four columns'),
 
-                 html.Div(style={'width': '24.4%', 'marginRight': '.8%','display':'inline-block','padding':'1rem',
+                 html.Div(id='rec-ind',
+                          style={'width': '24.4%', 'marginRight': '.8%','display':'inline-block','padding':'1rem',
                                  'backgroundColor':dash_colors['background']},
                           children=[html.P(style={'textAlign': 'center',
                                                   'color': dash_colors['red_bright'],
@@ -266,12 +269,13 @@ app.layout = html.Div(children=[
                                                    'fontWeight': 'bold', 'color': dash_colors['red_bright'],'fontSize':50},
                                             children='{:,.0f}'.format(int(global_total['Recovered']))),
                                     html.P(style={'textAlign': 'center',
-                                                  'color': dash_colors['red_bright'], 'fontSize': 20},
+                                                  'color': dash_colors['green'], 'fontSize': 20},
                                            children='{0:+,d}'.format(int(global_total['Recovered']) - int(delta['Recovered'])))
                                     ],
                           className='four columns'),
 
-                 html.Div(style={'width': '24.4%','display':'inline-block','padding':'1rem',
+                 html.Div(id='active-ind',
+                          style={'width': '24.4%','display':'inline-block','padding':'1rem',
                                  'backgroundColor':dash_colors['background']},
                           children=[html.P(style={'textAlign': 'center',
                                                   'color': dash_colors['red_bright'],
