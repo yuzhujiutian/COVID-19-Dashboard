@@ -222,6 +222,13 @@ app.layout = html.Div(children=[
                       ' (Maintained by John Hopkins University)',
              style={'textAlign':'center'}),
 
+    html.Div(dcc.RadioItems(id='view-picker',
+                            options=[{'label':i,'value':i} for i in ['Global','Top','Canada']],
+                            value='Global',
+                            labelStyle={'float':'center','display':'inline-block','padding':'5px'}),
+             style={'textAlign':'center','width':'100%','float':'center','display':'inline-block'}
+             ),
+
     html.Div(id='number-plate',
              style={'marginLeft':'1.5%','marginRight':'1.5%','marginBottom':'.5%','marginTop':'.5%'},
              children=[
