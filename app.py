@@ -7,7 +7,6 @@ from dash.dependencies import Input, Output, State
 
 #import plotly.graph_objects as go
 import plotly.express as px
-#from IPython.core.display import display, HTML
 
 import pandas as pd
 import numpy as np
@@ -85,7 +84,7 @@ global_melt = global_daily_count.melt(id_vars=['Date'],
                                       var_name='Type',value_name='Count'
                                       )
 
-### PLOTS ###
+'''PLOTS'''
 # todo re-create plots for app callback function
 
 fig_area = px.area(global_melt
@@ -113,41 +112,9 @@ fig_timeseries.update_layout(title = "Timeline of Confirmed Cases",
     yaxis_title = "Confirmed Cases",
     legend_title = "Country")
 
-# World Map
-fig_map = px.choropleth(countries_df
-                    ,locations="Country"
-                    ,locationmode='country names'
-                    ,color=np.log(countries_df["Confirmed"])#np.log(covid_ts["Confirmed"]) #logarithmic scale
-                    ,hover_name='Description'
-                    ,animation_frame=countries_df["Date"].dt.strftime('%Y-%m-%d')
-                    ,title='Global Heatmap of Confirmed Cases'
-                    ,color_continuous_scale=px.colors.sequential.Reds #Magenta
-                    ,template='plotly_dark'
-                    ,height=600
-                    ,width=1700
-                   )
-#fig_map.update_geos(fitbounds = "locations")
-fig_map.update(layout_coloraxis_showscale=True)
 
-# Bubble Map
 formatted_gdf = countries_df.groupby(['Date','Country','Description','Lat','Long'])['Confirmed'].max().reset_index()
 formatted_gdf['Date'] = formatted_gdf['Date'].dt.strftime('%m/%d/%Y')
-formatted_gdf['size'] = formatted_gdf['Confirmed'].pow(0.2)
-fig_bubble = px.scatter_geo(formatted_gdf,
-                     locations = "Country",
-                     locationmode = "country names",
-                     color = "Confirmed",
-                     hover_name = "Description",
-                     size = "size",
-                     animation_frame = "Date",
-                     projection = "natural earth",
-                     range_color= [0, 2500],
-                     color_continuous_scale="portland",
-                     template = "plotly_dark",
-                     title = "Covid-19 Confirmed Cases over Time",
-                     height=800
-                            )
-fig_bubble.update_layout(margin=dict(t=100,pad=4),autosize=True)
 
 # Mapbox
 fig_mapbox = px.scatter_mapbox(
@@ -210,9 +177,9 @@ update_date = time_series['Date'].max().strftime('%Y-%m-%d')
 # todo add a page for twitter/social media mentions
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
-server = app.server
 # https://dash-bootstrap-components.opensource.faculty.ai/docs/themes/
-
+server = app.server
+app.title = 'nCov-19'
 
 app.layout = html.Div(children=[
     html.H1(children='Covid-19 Interactive Tracker',
@@ -228,6 +195,13 @@ app.layout = html.Div(children=[
                             labelStyle={'float':'center','display':'inline-block','padding':'5px'}),
              style={'textAlign':'center','width':'100%','float':'center','display':'inline-block'}
              ),
+
+    html.Div([
+        dcc.Location(id='url', refresh=False),
+        dcc.Link('Navigate to',href='/'),
+        dcc.Link('Page 2',href='/page-2'),
+        html.Div(id='page-content'),
+    ],style={'textAlign':'center','width':'100%','float':'center','display':'inline-block'}),
 
     html.Div(id='number-plate',
              style={'marginLeft':'1.5%','marginRight':'1.5%','marginBottom':'.5%','marginTop':'.5%'},
