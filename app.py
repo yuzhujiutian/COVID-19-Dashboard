@@ -112,7 +112,7 @@ fig_timeseries.update_layout(title = "Timeline of Confirmed Cases",
     yaxis_title = "Confirmed Cases",
     legend_title = "Country")
 
-
+# Data input for Mapbox plot
 formatted_gdf = countries_df.groupby(['Date','Country','Description','Lat','Long'])['Confirmed'].max().reset_index()
 formatted_gdf['Date'] = formatted_gdf['Date'].dt.strftime('%m/%d/%Y')
 
@@ -167,11 +167,10 @@ def ticker_color(tick_value):
         return dash_colors['green']
 # todo update function to include colors for all metric types
 
-# Latest count per country
-global_total = global_daily_count[global_daily_count['Date'] == global_daily_count['Date'].max()]
+# Latest count per country for number plates
+global_total = global_daily_count.join(global_daily_count[['Confirmed','Deaths','Recovered','Active']].pct_change(fill_method='ffill').add_suffix('_pct'))
+global_total = global_total[global_daily_count['Date'] == global_total['Date'].max()]
 delta = global_daily_count[global_daily_count['Date'] == global_daily_count['Date'].max() - timedelta(days=1)]
-update_date = time_series['Date'].max().strftime('%Y-%m-%d')
-# todo add daily percent change for number plates
 
 '''BEGIN DASH APP'''
 # todo add a page for twitter/social media mentions
@@ -219,7 +218,9 @@ app.layout = html.Div(children=[
                                     html.P(style={'textAlign':'center',
                                                   'color': ticker_color(int(global_total['Confirmed']) - int(delta['Confirmed'])),
                                                   'fontSize':20},
-                                            children='{0:+,d}'.format(int(global_total['Confirmed']) - int(delta['Confirmed'])))
+                                            children='{0:+,d}'.format(int(global_total['Confirmed']) - int(delta['Confirmed']))
+                                           + ' (' + global_total['Confirmed_pct'].map('{:+.2%}'.format) +')'
+                                           )
                                     ],
                           className='four columns'),
 
@@ -235,7 +236,9 @@ app.layout = html.Div(children=[
                                             children='{:,.0f}'.format(int(global_total['Deaths']))),
                                     html.P(style={'textAlign': 'center',
                                                   'color': dash_colors['red_bright'], 'fontSize': 20},
-                                           children='{0:+,d}'.format(int(global_total['Deaths']) - int(delta['Deaths'])))
+                                           children='{0:+,d}'.format(int(global_total['Deaths']) - int(delta['Deaths']))
+                                           + ' (' + global_total['Deaths_pct'].map('{:+.2%}'.format) +')'
+                                           )
                                     ],
                           className='four columns'),
 
@@ -251,7 +254,9 @@ app.layout = html.Div(children=[
                                             children='{:,.0f}'.format(int(global_total['Recovered']))),
                                     html.P(style={'textAlign': 'center',
                                                   'color': dash_colors['green'], 'fontSize': 20},
-                                           children='{0:+,d}'.format(int(global_total['Recovered']) - int(delta['Recovered'])))
+                                           children='{0:+,d}'.format(int(global_total['Recovered']) - int(delta['Recovered']))
+                                           + ' (' + global_total['Recovered_pct'].map('{:+.2%}'.format) +')'
+                                           )
                                     ],
                           className='four columns'),
 
@@ -267,7 +272,9 @@ app.layout = html.Div(children=[
                                             children='{:,.0f}'.format(int(global_total['Active']))),
                                     html.P(style={'textAlign': 'center',
                                                   'color': dash_colors['red_bright'], 'fontSize': 20},
-                                           children='{0:+,d}'.format(int(global_total['Active']) - int(delta['Active'])))
+                                           children='{0:+,d}'.format(int(global_total['Active']) - int(delta['Active']))
+                                           + ' (' + global_total['Active_pct'].map('{:+.2%}'.format) +')'
+                                           )
                                     ],
                           className='four columns')
 
@@ -300,6 +307,33 @@ app.layout = html.Div(children=[
              ])
 ])
 
+#test page layout
+page_1_layout=html.Div([
+    html.Div(id='page-1'),
+    html.Div(id='global-trending',
+             style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'},
+             children=[
+                 html.Div(dcc.Graph(id='global-melt', figure=fig_area),
+                          style={'width': '49.6%', 'display': 'inline-block', 'marginRight': '.8%'}),
+                 html.Div(dcc.Graph(id='time-series', figure=fig_timeseries),
+                          style={'width': '49.6%', 'display': 'inline-block'})
+             ], className='row'),
+
+    html.Div(id='world-map',
+             style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'},
+             children=[html.Div(dcc.Graph(id='global-outbreak', figure=fig_mapbox, style={'height': 800}))
+                       ])
+])
+
+@app.callback(dash.dependencies.Output('page-content', 'children'),
+              [dash.dependencies.Input('url', 'pathname')])
+def display_page(pathname):
+    if pathname == '/page-1':
+        return page_1_layout
+    elif pathname == '/page-2':
+        return page_2_layout
+    else:
+        return index_page
 
 if __name__ == '__main__':
     app.run_server()
