@@ -188,16 +188,9 @@ app.layout = html.Div(children=[
                       ' (Maintained by John Hopkins University)',
              style={'textAlign':'center'}),
 
-    # html.Div(dcc.RadioItems(id='view-picker',
-    #                         options=[{'label':i,'value':i} for i in ['Global','Top','Canada']],
-    #                         value='Global',
-    #                         labelStyle={'float':'center','display':'inline-block','padding':'5px'}),
-    #          style={'textAlign':'center','width':'100%','float':'center','display':'inline-block'}
-    #          ),
-
     html.Div([
         dcc.Location(id='url', refresh=False),
-        dbc.Button(dcc.Link('Global',href='/page-1'), id="global-button", color='primary',active=True, className="mr-1"),
+        dbc.Button(dcc.Link('Global',href='/page-1'), id="global-button", color='primary', className="mr-1"),
         dbc.Button(dcc.Link('Top',href='/page-2'), id="top-button", color='primary', className="mr-1"),
         dbc.Button(dcc.Link('Canada',href='/page-3'), id="canada-button", color='primary', className="mr-1"),
         html.Div(id='page-content'),
@@ -229,7 +222,7 @@ number_plates = html.Div(id='number-plate',
                                     html.P(style={'textAlign':'center',
                                                   'color': ticker_color(int(global_total['Confirmed']) - int(delta['Confirmed'])),
                                                   'fontSize':20},
-                                            children='{0:+,d}'.format(int(global_total['Confirmed']) - int(delta['Confirmed']))
+                                           children='{0:+,d}'.format(int(global_total['Confirmed']) - int(delta['Confirmed']))
                                            + ' (' + global_total['Confirmed_pct'].map('{:+.2%}'.format) +')'
                                            )
                                     ],
@@ -289,36 +282,10 @@ number_plates = html.Div(id='number-plate',
                                     ],
                           className='four columns')
 
-             ],className='row'
+             ], className='row'
+)
 
-# children=[html.P(style={'textAlign':'center','fontWeight':'bold','color':'#d7191c','padding':'1rem'},
-
-        # children = confirmed_number,
-        #      style={
-        #          'textAlign': 'center',
-        #          'color': dash_colors['red'],
-        #          'width': '25%',
-        #          'float': 'left',
-        #          'display': 'inline-block'
-        #      }
-)#,
-#
-#     html.Div(id='global-trending',
-#              style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'},
-#              children=[
-#                  html.Div(dcc.Graph(id='global-melt',figure=fig_area),
-#                           style={'width':'49.6%','display':'inline-block','marginRight':'.8%'}),
-#                  html.Div(dcc.Graph(id='time-series',figure=fig_timeseries),
-#                           style={'width':'49.6%','display':'inline-block'})
-#              ],className='row'),
-#
-#     html.Div(id='world-map',
-#              style={'marginLeft':'1.5%','marginRight':'1.5%','marginBottom':'.5%','marginTop':'.5%'},
-#              children=[html.Div(dcc.Graph(id='global-outbreak',figure = fig_mapbox,style={'height':800}))
-#              ])
-#])
-
-page_1_layout=html.Div([
+page_1_layout = html.Div([
     html.Div(id='page-1'),
     html.Div(id='global-trending',
              style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'},
@@ -335,16 +302,15 @@ page_1_layout=html.Div([
                        ])
 ])
 
-page_2_layout=html.Div([
-    html.Div(id='page-2'),
-    html.Div(id='global-trending',
-             style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'},
-             children=[
-                 html.Div(dcc.Graph(id='global-melt', figure=fig_area),
-                          style={'width': '49.6%', 'display': 'inline-block', 'marginRight': '.8%'}),
-                 html.Div(dcc.Graph(id='time-series', figure=fig_timeseries),
-                          style={'width': '49.6%', 'display': 'inline-block'})
-             ], className='row'),
+df = countries_df[countries_df['Date'] == countries_df['Date'].max()].groupby(['Country'])['Confirmed','Deaths','Recovered','Active'].sum().sort_values('Confirmed',ascending=False).head(20).reset_index()
+df[['Confirmed','Deaths','Recovered','Active']] = df[['Confirmed','Deaths','Recovered','Active']].astype(int).applymap('{:,}'.format)
+page_2_layout = html.Div([
+    html.Div(id='page-3'),
+    html.Div(dbc.Table.from_dataframe(df,striped=True, bordered=True, hover=True))
+], style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'})
+
+page_3_layout = html.Div([
+
 ])
 
 @app.callback(Output('page-content', 'children'),
@@ -353,9 +319,9 @@ def display_page(pathname):
     if pathname == '/page-1':
         return number_plates, page_1_layout
     elif pathname == '/page-2':
-        return number_plates,page_2_layout
+        return number_plates, page_2_layout
     elif pathname == '/page-3':
-        return number_plates
+        return number_plates, page_3_layout
     else:
         return number_plates, page_1_layout
 
