@@ -197,7 +197,7 @@ app.layout = html.Div(children=[
 
     html.Div([
         dcc.Location(id='url', refresh=False),
-        dbc.Button(dcc.Link('Global',href='/page-1'), id="global-button", color='primary', className="mr-1"),
+        dbc.Button(dcc.Link('Global',href='/page-1'), id="global-button", color='primary',active=True, className="mr-1"),
         dbc.Button(dcc.Link('Top',href='/page-2'), id="top-button", color='primary', className="mr-1"),
         dbc.Button(dcc.Link('Canada',href='/page-3'), id="canada-button", color='primary', className="mr-1"),
         html.Div(id='page-content'),
