@@ -84,8 +84,14 @@ global_melt = global_daily_count.melt(id_vars=['Date'],
                                       var_name='Type',value_name='Count'
                                       )
 
+# Data for Canada
+canada_df = time_series.copy()
+canada_df = canada_df[canada_df['Country/Region'] == 'Canada'].reset_index(drop=True)
+canada_df.rename(columns={"Country/Region": "Country"}, inplace=True)
+canada_df.fillna(0, inplace=True)
+canada_df['Active'] = canada_df['Confirmed'] - canada_df['Recovered']
+
 '''PLOTS'''
-# todo re-create plots for app callback function
 
 fig_area = px.area(global_melt
               ,x="Date"
@@ -137,6 +143,24 @@ fig_mapbox = px.scatter_mapbox(
     #height=800
     )
 fig_mapbox.update_layout(autosize=True,coloraxis_showscale=False)
+
+#Ontario Map
+fig_can = px.line(x=canada_df['Date'],
+        y=canada_df["Confirmed"],
+        color=canada_df['Province/State'],
+        hover_name=canada_df['Province/State'],
+        line_shape="spline",
+        render_mode="svg",
+        template='plotly_dark'
+)
+
+# Add labels
+fig_can.update_layout(
+    title = "Confirmed Cases in Canada - by Province",
+    xaxis_title = "Date",
+    yaxis_title = "Count",
+    legend_title = "Province"
+)
 
 default_layout = {
     'autosize': True,
@@ -196,7 +220,8 @@ app.layout = html.Div(children=[
         html.Div(id='page-content'),
         #html.Span(id='button-container')
     ],style={'textAlign':'center','width':'100%','float':'center','display':'inline-block','marginTop':'.5%'}),
-])
+]#,style={'background-image':'url("assets/background_image.png")'}
+)
 
     # html.Div([
     #     dcc.Location(id='url', refresh=False),
@@ -302,15 +327,23 @@ page_1_layout = html.Div([
                        ])
 ])
 
-df = countries_df[countries_df['Date'] == countries_df['Date'].max()].groupby(['Country'])['Confirmed','Deaths','Recovered','Active'].sum().sort_values('Confirmed',ascending=False).head(20).reset_index()
+df = countries_df[countries_df['Date'] == countries_df['Date'].max()].groupby(['Country'])['Confirmed','Deaths','Recovered','Active'].sum().sort_values('Confirmed',ascending=False).reset_index()
+df['Rank'] = df.index + 1
+df = df[['Rank','Country','Confirmed','Deaths','Recovered','Active']]
 df[['Confirmed','Deaths','Recovered','Active']] = df[['Confirmed','Deaths','Recovered','Active']].astype(int).applymap('{:,}'.format)
 page_2_layout = html.Div([
     html.Div(id='page-3'),
-    html.Div(dbc.Table.from_dataframe(df,striped=True, bordered=True, hover=True))
+    html.Div(dbc.Table.from_dataframe(df.head(20),striped=True, bordered=True, hover=True))
 ], style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'})
 
 page_3_layout = html.Div([
-
+    html.Div(id='page-3'),
+    html.Div(id='canada-trending',
+             style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'},
+             children=[
+                 html.Div(dcc.Graph(id='canada', figure=fig_can),
+                          style={'width': '49.6%', 'display': 'inline-block', 'marginRight': '.8%'}),
+             ], className='row')
 ])
 
 @app.callback(Output('page-content', 'children'),
