@@ -188,21 +188,32 @@ app.layout = html.Div(children=[
                       ' (Maintained by John Hopkins University)',
              style={'textAlign':'center'}),
 
-    html.Div(dcc.RadioItems(id='view-picker',
-                            options=[{'label':i,'value':i} for i in ['Global','Top','Canada']],
-                            value='Global',
-                            labelStyle={'float':'center','display':'inline-block','padding':'5px'}),
-             style={'textAlign':'center','width':'100%','float':'center','display':'inline-block'}
-             ),
+    # html.Div(dcc.RadioItems(id='view-picker',
+    #                         options=[{'label':i,'value':i} for i in ['Global','Top','Canada']],
+    #                         value='Global',
+    #                         labelStyle={'float':'center','display':'inline-block','padding':'5px'}),
+    #          style={'textAlign':'center','width':'100%','float':'center','display':'inline-block'}
+    #          ),
 
     html.Div([
         dcc.Location(id='url', refresh=False),
-        dcc.Link('Navigate to',href='/'),
-        dcc.Link('Page 2',href='/page-2'),
+        dbc.Button(dcc.Link('Global',href='/page-1'), id="global-button", color='primary', className="mr-1"),
+        dbc.Button(dcc.Link('Top',href='/page-2'), id="top-button", color='primary', className="mr-1"),
+        dbc.Button(dcc.Link('Canada',href='/page-3'), id="canada-button", color='primary', className="mr-1"),
         html.Div(id='page-content'),
-    ],style={'textAlign':'center','width':'100%','float':'center','display':'inline-block'}),
+        #html.Span(id='button-container')
+    ],style={'textAlign':'center','width':'100%','float':'center','display':'inline-block','marginTop':'.5%'}),
+])
 
-    html.Div(id='number-plate',
+    # html.Div([
+    #     dcc.Location(id='url', refresh=False),
+    #     #dcc.Link('Global',href='/page-1'),
+    #     #dcc.Link('Top',href='/page-2'),
+    #     dcc.Link('Canada',href='/page-3'),
+    #     html.Div(id='page-content'),
+    # ],style={'textAlign':'center','width':'100%','float':'center','display':'inline-block'})])
+
+number_plates = html.Div(id='number-plate',
              style={'marginLeft':'1.5%','marginRight':'1.5%','marginBottom':'.5%','marginTop':'.5%'},
              children=[
                  html.Div(id='conf-ind',
@@ -290,24 +301,23 @@ app.layout = html.Div(children=[
         #          'float': 'left',
         #          'display': 'inline-block'
         #      }
-),
+)#,
+#
+#     html.Div(id='global-trending',
+#              style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'},
+#              children=[
+#                  html.Div(dcc.Graph(id='global-melt',figure=fig_area),
+#                           style={'width':'49.6%','display':'inline-block','marginRight':'.8%'}),
+#                  html.Div(dcc.Graph(id='time-series',figure=fig_timeseries),
+#                           style={'width':'49.6%','display':'inline-block'})
+#              ],className='row'),
+#
+#     html.Div(id='world-map',
+#              style={'marginLeft':'1.5%','marginRight':'1.5%','marginBottom':'.5%','marginTop':'.5%'},
+#              children=[html.Div(dcc.Graph(id='global-outbreak',figure = fig_mapbox,style={'height':800}))
+#              ])
+#])
 
-    html.Div(id='global-trending',
-             style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'},
-             children=[
-                 html.Div(dcc.Graph(id='global-melt',figure=fig_area),
-                          style={'width':'49.6%','display':'inline-block','marginRight':'.8%'}),
-                 html.Div(dcc.Graph(id='time-series',figure=fig_timeseries),
-                          style={'width':'49.6%','display':'inline-block'})
-             ],className='row'),
-
-    html.Div(id='world-map',
-             style={'marginLeft':'1.5%','marginRight':'1.5%','marginBottom':'.5%','marginTop':'.5%'},
-             children=[html.Div(dcc.Graph(id='global-outbreak',figure = fig_mapbox,style={'height':800}))
-             ])
-])
-
-#test page layout
 page_1_layout=html.Div([
     html.Div(id='page-1'),
     html.Div(id='global-trending',
@@ -325,15 +335,30 @@ page_1_layout=html.Div([
                        ])
 ])
 
-@app.callback(dash.dependencies.Output('page-content', 'children'),
-              [dash.dependencies.Input('url', 'pathname')])
+page_2_layout=html.Div([
+    html.Div(id='page-2'),
+    html.Div(id='global-trending',
+             style={'marginLeft': '1.5%', 'marginRight': '1.5%', 'marginBottom': '.5%', 'marginTop': '.5%'},
+             children=[
+                 html.Div(dcc.Graph(id='global-melt', figure=fig_area),
+                          style={'width': '49.6%', 'display': 'inline-block', 'marginRight': '.8%'}),
+                 html.Div(dcc.Graph(id='time-series', figure=fig_timeseries),
+                          style={'width': '49.6%', 'display': 'inline-block'})
+             ], className='row'),
+])
+
+@app.callback(Output('page-content', 'children'),
+              [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/page-1':
-        return page_1_layout
+        return number_plates, page_1_layout
     elif pathname == '/page-2':
-        return page_2_layout
+        return number_plates,page_2_layout
+    elif pathname == '/page-3':
+        return number_plates
     else:
-        return index_page
+        return number_plates, page_1_layout
+
 
 if __name__ == '__main__':
     app.run_server()
