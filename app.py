@@ -66,7 +66,7 @@ countries_df.loc[countries_df['Country'] == 'Netherlands', 'Long'] = 5.2913
 countries_df.loc[countries_df['Country'] == 'Canada', 'Lat'] = 59.050000
 countries_df.loc[countries_df['Country'] == 'Canada', 'Long'] = -112.833333
 
-countries_df['Active'] = countries_df['Confirmed'] - countries_df['Recovered']
+countries_df['Active'] = countries_df['Confirmed'] - countries_df['Recovered'] -countries_df['Deaths']
 
 # Description for map
 countries_df['Description'] = countries_df['Country'] + '<br>' \
@@ -84,12 +84,12 @@ global_melt = global_daily_count.melt(id_vars=['Date'],
                                       var_name='Type',value_name='Count'
                                       )
 
-# Data for Canada
+# Data for Canada - by province
 canada_df = time_series.copy()
 canada_df = canada_df[canada_df['Country/Region'] == 'Canada'].reset_index(drop=True)
 canada_df.rename(columns={"Country/Region": "Country"}, inplace=True)
 canada_df.fillna(0, inplace=True)
-canada_df['Active'] = canada_df['Confirmed'] - canada_df['Recovered']
+canada_df['Active'] = canada_df['Confirmed'] - canada_df['Recovered'] - canada_df['Deaths']
 
 '''PLOTS'''
 
@@ -132,7 +132,7 @@ fig_mapbox = px.scatter_mapbox(
     size=formatted_gdf['Confirmed'].pow(0.3),
     range_color=[0, 4000],
     opacity=0.6,
-    size_max=40,
+    size_max=30,
     zoom=1.2,
     animation_frame=countries_df['Date'].astype(str),
     # center=go.layout.mapbox.Center(lat=14,lon=21),
@@ -140,7 +140,6 @@ fig_mapbox = px.scatter_mapbox(
     color=formatted_gdf['Confirmed'],
     color_continuous_scale='portland',
     #color_discrete_sequence=px.colors.qualitative.Light24,
-    #height=800
     )
 fig_mapbox.update_layout(autosize=True,coloraxis_showscale=False)
 
@@ -156,7 +155,7 @@ fig_can = px.line(x=canada_df['Date'],
 
 # Add labels
 fig_can.update_layout(
-    title = "Confirmed Cases in Canada - by Province",
+    title = "Timeline of Confirmed Cases - by Province",
     xaxis_title = "Date",
     yaxis_title = "Count",
     legend_title = "Province"
