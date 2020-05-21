@@ -91,6 +91,10 @@ canada_df.rename(columns={"Country/Region": "Country"}, inplace=True)
 canada_df.fillna(0, inplace=True)
 canada_df['Active'] = canada_df['Confirmed'] - canada_df['Recovered'] - canada_df['Deaths']
 
+# Canada day over day
+p = canada_df.groupby(['Date','Province/State'])['Confirmed'].sum().reset_index()
+p['Diff'] = p.groupby('Province/State')['Confirmed'].diff(periods=1)
+
 '''PLOTS'''
 
 fig_area = px.area(global_melt
@@ -158,6 +162,24 @@ fig_can.update_layout(
     title = "Timeline of Confirmed Cases - by Province",
     xaxis_title = "Date",
     yaxis_title = "Count",
+    legend_title = "Province"
+)
+
+#Ontario day over day
+fig_dod = px.line(x=p['Date'],
+        y=p["Diff"],
+        color=p['Province/State'],
+        hover_name=p['Province/State'],
+        line_shape="linear",
+        render_mode="svg",
+        template='plotly_dark'
+)
+
+# Add labels
+fig_dod.update_layout(
+    title = "Day over day - by Province",
+    xaxis_title = "Date",
+    yaxis_title = "Daily Delta",
     legend_title = "Province"
 )
 
@@ -342,6 +364,8 @@ page_3_layout = html.Div([
              children=[
                  html.Div(dcc.Graph(id='canada', figure=fig_can),
                           style={'width': '49.6%', 'display': 'inline-block', 'marginRight': '.8%'}),
+                 html.Div(dcc.Graph(id='dod', figure=fig_dod),
+                          style={'width': '49.6%', 'display': 'inline-block'})
              ], className='row')
 ])
 
