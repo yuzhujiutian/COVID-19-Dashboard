@@ -352,6 +352,7 @@ df = countries_df[countries_df['Date'] == countries_df['Date'].max()].groupby(['
 df['Rank'] = df.index + 1
 df = df[['Rank','Country','Confirmed','Deaths','Recovered','Active']]
 df[['Confirmed','Deaths','Recovered','Active']] = df[['Confirmed','Deaths','Recovered','Active']].astype(int).applymap('{:,}'.format)
+
 page_2_layout = html.Div([
     html.Div(id='page-3'),
     html.Div(dbc.Table.from_dataframe(df.head(20),striped=True, bordered=True, hover=True))
@@ -369,6 +370,7 @@ page_3_layout = html.Div([
              ], className='row')
 ])
 
+# Display correct page based on user selection
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
